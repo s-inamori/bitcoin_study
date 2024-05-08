@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"math/big"
 )
 
 type FieldElement struct {
@@ -51,7 +50,7 @@ func (fe *FieldElement) Mul(other *FieldElement) FieldElement {
 
 // 有限体のべき乗
 func (fe *FieldElement) Pow(exponent int) FieldElement {
-	num := pow(fe.num, exponent, &fe.prime)
+	num := Pow(fe.num, exponent, &fe.prime)
 	return FieldElement{num, fe.prime}
 }
 
@@ -60,7 +59,7 @@ func (fe *FieldElement) Div(other *FieldElement) FieldElement {
 	if fe.prime != other.prime {
 		log.Panicf("Cannot div two numbers in different Fields")
 	}
-	num := fe.num * pow(other.num, fe.prime-2, &fe.prime) % fe.prime
+	num := fe.num * Pow(other.num, fe.prime-2, &fe.prime) % fe.prime
 	return FieldElement{num, fe.prime}
 }
 
@@ -72,19 +71,4 @@ func modLikePython(d int, m int) int {
 		return res + m
 	}
 	return res
-}
-
-// PythonのPowの第三引数の挙動を再現する
-// https://stackoverflow.com/a/77542076
-func pow(a, b int, m *int) int {
-	var mod *big.Int
-	if m != nil {
-		mod = big.NewInt(int64(*m))
-	}
-	result := new(big.Int).Exp(
-		big.NewInt(int64(a)),
-		big.NewInt(int64(b)),
-		mod,
-	)
-	return int(result.Uint64())
 }
